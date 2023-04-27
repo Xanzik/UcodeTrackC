@@ -1,5 +1,5 @@
 CC = clang
-CFLAGS = -std=c11 -Wall -Wextra -Werror -Wpedantic -D_GNU_SOURCE
+CFLAGS = -std=c11 -Wall -Wextra -Werror -Wpedantic
 
 OBJDIR = obj
 SRCDIR = src

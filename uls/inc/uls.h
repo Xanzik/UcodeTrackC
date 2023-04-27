@@ -29,19 +29,30 @@ void uls_directory_search(int argc, char **argv);
 
 typedef struct s_file {
     char *name;
+    int index;
     bool is_directory;
     struct s_file *next;
 }              t_file;
 
 void free_files(t_file *head);
-void add_file(t_file **head, char *name);
-t_file *new_file(char *name);
+void add_file(t_file **head, char *name, int index);
 void sort_files(t_file **head);
+t_file* get_index_file(t_file* list, int index);
+int get_col_width(int max_lenght);
+int get_rows(int col, int count);
+int get_cols(int w_cols, int width);
 void print_directories(t_file *head, int is_terminal, int file_count, int directory_count);
-void print_files(t_file *head, int is_terminal, char **argv, int file_count);
+void print_files(t_file *head, int is_terminal);
+void mx_print_tab(int width, int len);
 
 void print_info(const char* filename);
 void printl();
 
 void printPermissions(mode_t mode);
 void printFileInfo(struct stat *info, char *filename);
+
+void full_list(t_file **head);
+int get_file_count(t_file *head);
+int get_lenght(t_file *head);
+int get_num_tabs(int width, int len);
+

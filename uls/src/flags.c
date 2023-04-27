@@ -1,6 +1,5 @@
 #include "../inc/uls.h"
 
-
 void printl() {
     DIR *dir;
     struct dirent *entry;
@@ -8,6 +7,7 @@ void printl() {
     struct stat info;
     int total_blocks = 0;
     dir = opendir(".");
+    int index = 0;
     while ((entry = readdir(dir)) != NULL) {
         if (mx_strcmp(entry->d_name, ".") == 0 
             || mx_strcmp(entry->d_name, "..") == 0
@@ -15,7 +15,8 @@ void printl() {
                 continue;
         }
         char *path = entry->d_name;
-        add_file(&head, path);
+        add_file(&head, path, index);
+        index++;
         if(stat(entry->d_name, &info) != -1) {
             total_blocks += info.st_blocks;
         }

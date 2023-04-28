@@ -13,6 +13,13 @@
 #include <grp.h>
 #include <time.h>
 
+#define FLAGS "l"
+
+typedef struct s_flag {
+    int l;
+    int count;
+}               t_flag;
+
 #define IS_DIR(mode) ((mode) & S_IFDIR ? "d" : "-")
 #define IS_RUSR(mode) ((mode) & S_IRUSR ? "r" : "-")
 #define IS_WUSR(mode) ((mode) & S_IWUSR ? "w" : "-")
@@ -31,11 +38,26 @@ typedef struct s_file {
     char *name;
     int index;
     bool is_directory;
+
+    char* num_links;
+    char* user_name;
+    char* group_name;
+    char* size;
+    char* lm_day;
+    char* lm_time;
+    char* lm_month;
+    char* perms;
+    char* linked_file;
+    char* acl_str;
+
+    struct stat info;
+
     struct s_file *next;
 }              t_file;
 
 void free_files(t_file *head);
 void add_file(t_file **head, char *name, int index);
+void add_file_l(t_file **head, char *name, int index);
 void sort_files(t_file **head);
 t_file* get_index_file(t_file* list, int index);
 int get_col_width(int max_lenght);
@@ -45,14 +67,18 @@ void print_directories(t_file *head, int is_terminal, int file_count, int direct
 void print_files(t_file *head, int is_terminal);
 void mx_print_tab(int width, int len);
 
-void print_info(const char* filename);
 void printl();
 
-void printPermissions(mode_t mode);
-void printFileInfo(struct stat *info, char *filename);
+char *get_permissions(struct stat *info);
+void get_lm_date(t_file **file, struct stat *info);
+
+void printFileInfo(struct stat *info, t_file *filename);
 
 void full_list(t_file **head);
 int get_file_count(t_file *head);
 int get_lenght(t_file *head);
 int get_num_tabs(int width, int len);
 
+t_flag* get_flags(int argc, char **argv);
+bool is_flag(char flag);
+void add_flag(t_flag** flags, char flag);

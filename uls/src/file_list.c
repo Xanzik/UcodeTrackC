@@ -1,10 +1,54 @@
 #include "../inc/uls.h"
 
 void add_file(t_file **head, char *name, int index) {
-    t_file *new_node = (t_file *) malloc(sizeof(t_file));
+    t_file *new_node = malloc(sizeof(t_file));
     new_node->name = mx_strdup(name);
     new_node->next = NULL;
     new_node->index = index;
+    t_file *last = *head;
+    if (*head == NULL) {
+        *head = new_node;
+        return;
+    }
+    while (last->next != NULL) {
+        last = last->next;
+    }
+    last->next = new_node;
+}
+
+void add_file_l(t_file **head, char *name, int index) {
+    struct stat info;
+    t_file *new_node = malloc(sizeof(t_file));
+    new_node->name = mx_strdup(name);
+    new_node->next = NULL;
+    new_node->index = index;
+    new_node->is_directory = false;
+    new_node->num_links = NULL;
+    new_node->user_name = NULL;
+    new_node->group_name = NULL;
+    new_node->size = NULL;
+    new_node->lm_day = NULL;
+    new_node->lm_time = NULL;
+    new_node->lm_month = NULL;
+    new_node->perms = NULL;
+    new_node->linked_file = NULL;
+    new_node->acl_str = NULL;
+
+    if(stat(name, &info) == -1) {
+        perror(name);
+        exit(EXIT_FAILURE);
+    }
+        
+    struct passwd *pw = getpwuid(info.st_uid);
+    struct group *gr = getgrgid(info.st_gid);
+
+    new_node->perms = get_permissions(&info);
+    new_node->num_links = mx_itoa(info.st_nlink);
+    new_node->user_name = pw ? mx_strdup(pw->pw_name) : mx_itoa(info.st_uid);
+    new_node->group_name = gr ? mx_strdup(gr->gr_name) : mx_itoa(info.st_gid);
+
+    get_lm_date(&new_node, &info);
+    
     t_file *last = *head;
     if (*head == NULL) {
         *head = new_node;
@@ -90,55 +134,3 @@ t_file* get_index_file(t_file* list, int index) {
     }
     return NULL;
 }
-
-void print_directories(t_file *head, int is_terminal, int file_count, int directory_count) {
-    DIR *dir;
-    struct dirent *de;
-    t_file *current = head;
-    if(file_count > 1)
-        sort_files(&current);
-    int step = 0;
-    while (current != NULL) {
-        if(directory_count != 1 || file_count > 0) {
-            mx_printstr(current->name);
-            mx_printstr(":\n");
-        }
-        dir = opendir(current->name);
-
-        // Create a list of files for this directory
-        t_file *dir_files = NULL;
-        int index = 0;
-        while ((de = readdir(dir)) != NULL) {
-            if(mx_strcmp(de->d_name, ".") == 0 
-                || mx_strcmp(de->d_name, "..") == 0
-                || de->d_name[0] == '.'){
-                continue;
-            }
-            char *path = de->d_name;
-            add_file(&dir_files, path, index);
-            index++;
-        }
-
-        // Sort the files in this directory
-        sort_files(&dir_files);
-
-        // Print the files in this directory
-        print_files(dir_files, is_terminal);
-
-        // Free the list of files for this directory
-        free_files(dir_files);
-
-        step++;
-        if (!is_terminal) {
-            if(step != directory_count)
-                mx_printstr("\n");
-        }
-        else {
-            if(step != directory_count)
-                mx_printstr("\n");
-        }
-        closedir(dir);
-        current = current->next;
-    }
-}
-

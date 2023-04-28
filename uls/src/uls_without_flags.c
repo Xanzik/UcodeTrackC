@@ -1,8 +1,7 @@
 #include "../inc/uls.h"
 
 void uls_without_flags() {
-    int is_terminal;
-    is_terminal = isatty(STDOUT_FILENO);
+    int is_terminal = isatty(STDOUT_FILENO);;
     t_file *head = NULL;
     full_list(&head);
     sort_files(&head);

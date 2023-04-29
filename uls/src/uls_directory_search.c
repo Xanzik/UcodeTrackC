@@ -1,6 +1,6 @@
 #include "../inc/uls.h"
 
-void uls_directory_search(int argc, char **argv) {
+void uls_directory_search(int argc, char **argv, t_flag *flags) {
     int is_terminal;
     int file_count = 0;
     int directory_count = 0;
@@ -14,12 +14,12 @@ void uls_directory_search(int argc, char **argv) {
             struct stat st;
             if (stat(argv[i], &st) == 0 && S_ISREG(st.st_mode)) {
                 file_count++;
-                add_file(&files_head, argv[i], file_index);
+                add_file(&files_head, argv[i], file_index, flags, NULL);
                 file_index++;
             }
             else {
                 directory_count++;
-                add_file(&dirs_head, argv[i], dir_index);
+                add_file(&dirs_head, argv[i], dir_index, flags, NULL);
                 dir_index++;
             }
         }
@@ -29,7 +29,8 @@ void uls_directory_search(int argc, char **argv) {
     if(directory_count != 0 && file_count > 0) {
         mx_printstr("\n");
     }
-    print_directories(dirs_head, is_terminal, file_count, directory_count);
+    sort_files(&dirs_head);
+    print_directories(dirs_head, is_terminal, file_count, directory_count, flags);
     free_files(files_head);
     free_files(dirs_head);
 }

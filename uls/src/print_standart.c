@@ -58,7 +58,7 @@ void print_files(t_file *head, int is_terminal) {
     }
 }
 
-void print_directories(t_file *head, int is_terminal, int file_count, int directory_count) {
+void print_directories(t_file *head, int is_terminal, int file_count, int directory_count, t_flag *flags) {
     DIR *dir;
     struct dirent *de;
     t_file *current = head;
@@ -80,8 +80,7 @@ void print_directories(t_file *head, int is_terminal, int file_count, int direct
                 || de->d_name[0] == '.'){
                 continue;
             }
-            char *path = de->d_name;
-            add_file(&dir_files, path, index);
+            add_file(&dir_files, de->d_name, index, flags, NULL);
             index++;
         }
 

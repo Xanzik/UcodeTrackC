@@ -35,3 +35,27 @@ void get_lm_date(t_file **file, struct stat *info) {
     free(time_str);
     mx_del_strarr(&lm);
 }
+
+char* get_linked_file(t_file *file) {
+    int size = file->info.st_size;
+    char *res = mx_strnew(size);
+    int link = readlink(file->path, res, size);
+    if(link == -1) {
+        mx_strdel(&res);
+        return NULL;
+    }
+    res[link] = '\0';
+    return res;
+}
+
+char get_extra_perms(t_file *file) {
+    ssize_t buf = listxattr(file->path, NULL, 0, XATTR_NOFOLLOW);
+    acl_t acl = acl_get_file(file->path, ACL_TYPE_EXTENDED);
+    if(buf > 0) {
+        return '@';
+    } else if(acl != NULL) {
+        acl_free(acl);
+        return '+';
+    }
+    return ' ';
+}

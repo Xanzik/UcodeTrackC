@@ -3,6 +3,7 @@
 #include "../libmx/inc/libmx.h"
 
 #include <dirent.h>
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -10,6 +11,7 @@
 #include <sys/types.h>
 #include <sys/xattr.h>
 #include <sys/acl.h>
+#include <errno.h>
 #include <unistd.h>
 #include <pwd.h>
 #include <grp.h>
@@ -31,6 +33,8 @@
 typedef struct s_flag {
     int l;
     int count;
+
+    int error;
 }               t_flag;
 
 typedef struct s_file {
@@ -68,6 +72,7 @@ void uls_directory_search(int argc, char **argv, t_flag *flags);
 
 void add_file(t_file **head, char *name, int index, t_flag *flags, char *path);
 void full_list(t_file **head,  t_flag *flags);
+//void full_list_l(t_file **files_head, t_file **dirs_head, t_flag *flags, int argc, char **argv);
 void sort_files(t_file **head);
 void free_files(t_file *head);
 char *get_path_dir(char *dir, char* file);
@@ -112,3 +117,6 @@ char *set_back_space(char *str, int max_lenght);
 void print_current_l(t_flag *flags);
 void print_all_l(char **argv, t_flag *flags, int argc);
 void print_dir_l(t_file *head, int file_count, int directory_count, t_flag *flags);
+
+void print_dir_err(char *error, char *path);
+void sort_err(char **list, int n);

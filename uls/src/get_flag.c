@@ -9,6 +9,14 @@ t_flag* get_flags(int argc, char **argv) {
                 if(is_flag(argv[i][j])) {
                     add_flag(&flags, argv[i][j]);
                 }
+                else {
+                    mx_printerr("uls: ");
+                    mx_printerr("illegal option -- ");
+                    mx_printerr(&argv[i][j]);
+                    mx_printerr("\n");
+                    mx_printerr("usage : uls [-l] [file ...]\n");
+                    exit(1);
+                }
             }
         }
     }

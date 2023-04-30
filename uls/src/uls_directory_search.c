@@ -8,6 +8,12 @@ void uls_directory_search(int argc, char **argv, t_flag *flags) {
     t_file *dirs_head = NULL;
     int file_index = 0;
     int dir_index = 0;
+    int num_words = argc-1;
+    char **list = (char **)malloc(num_words * sizeof(char *));
+    for(int i = 0; i < num_words; i++) {
+        list[i] = (char *)malloc((mx_strlen(argv[i+1]) + 100) * sizeof(char));
+    }
+    int check = 0;
     is_terminal = isatty(STDOUT_FILENO);
     for (int i = 1; i < argc; i++) {
         if (access(argv[i], F_OK) != -1) {
@@ -22,6 +28,17 @@ void uls_directory_search(int argc, char **argv, t_flag *flags) {
                 add_file(&dirs_head, argv[i], dir_index, flags, NULL);
                 dir_index++;
             }
+        } else {
+            mx_strcpy(list[check], argv[i]);
+            flags->error = -1;
+            check++;
+        }
+    }
+    if(flags->error == -1) {
+        sort_err(list, check);
+        for(int i = 0; i < check; i++) {
+            if(list[i] != NULL)
+                print_dir_err(strerror(errno), list[i]);
         }
     }
     if(file_count != 0)
@@ -31,6 +48,10 @@ void uls_directory_search(int argc, char **argv, t_flag *flags) {
     }
     sort_files(&dirs_head);
     print_directories(dirs_head, is_terminal, file_count, directory_count, flags);
+    for(int i = 0; i < num_words; i++) {
+        free(list[i]);
+    }
+    free(list);
     free_files(files_head);
     free_files(dirs_head);
 }

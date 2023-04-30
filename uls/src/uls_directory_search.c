@@ -42,6 +42,7 @@ void uls_directory_search(int argc, char **argv, t_flag *flags) {
         }
     }
     if(file_count != 0)
+        sort_files(&files_head);
         print_files(files_head, is_terminal);
     if(directory_count != 0 && file_count > 0) {
         mx_printstr("\n");

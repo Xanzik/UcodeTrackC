@@ -132,7 +132,7 @@ void print_dir_l(t_file *head, int file_count, int directory_count, t_flag *flag
     t_file *current = head;
     sort_files(&current);
     while (current != NULL) {
-        if(directory_count != 1 || file_count > 0) {
+        if(directory_count != 1 || file_count > 0 || flags->error == -1) {
             mx_printstr(current->name);
             mx_printstr(":\n");
         }

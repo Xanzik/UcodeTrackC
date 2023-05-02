@@ -54,7 +54,7 @@ void print_R(t_flag *flags, DIR *dir, char *path, bool first, bool end, int num)
 
 void output_R_dir(int argc, char **argv, t_flag *flags) {
         if(argc > 2) {
-        int num_words = argc - 2;
+        int num_words = argc - 1;
         char **list = (char **)malloc(num_words * sizeof(char *));
         for(int i = 0; i < num_words; i++) {
             list[i] = (char *)malloc((mx_strlen(argv[i+1]) + 100) * sizeof(char));
@@ -63,7 +63,7 @@ void output_R_dir(int argc, char **argv, t_flag *flags) {
         int file_index = 0;
         int dier = 0;
         if(argc > flags->count) {
-            for (int i = 2; i < argc; i++) {
+            for (int i = 1; i < argc; i++) {
                 if (access(argv[i], F_OK) != -1) {
                 struct stat st;
                 if (stat(argv[i], &st) == 0 && S_ISREG(st.st_mode)) {
@@ -71,8 +71,12 @@ void output_R_dir(int argc, char **argv, t_flag *flags) {
                     file_index++;
                 }
                 else {
+                if(argv[i][0] == '-' && mx_strlen(argv[i]) > 1 && file_index == 0) {
+
+                } else {
                     mx_strcpy(list[dier], argv[i]);
                     dier++;
+                }
                 }
                 }
             }

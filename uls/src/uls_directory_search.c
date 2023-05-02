@@ -29,7 +29,7 @@ void uls_directory_search(int argc, char **argv, t_flag *flags) {
                 dir_index++;
             }
         } else {
-            if(argv[i][0] == '-' && mx_strlen(argv[i]) > 1) {
+            if(argv[i][0] == '-' && mx_strlen(argv[i]) > 1 && dir_index == 0) {
 
             }
             else {

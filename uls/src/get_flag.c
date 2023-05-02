@@ -19,7 +19,10 @@ t_flag* get_flags(int argc, char **argv) {
                     exit(1);
                 }
             }
+        } else {
+            break;
         }
+
     }
     return flags;
 }

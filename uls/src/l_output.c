@@ -98,11 +98,11 @@ void print_all_l(char **argv, t_flag *flags, int argc) {
     }
     int check = 0;
     for (int i = 2; i < argc; i++) {
-        if(argv[i][0] == '-' && mx_strlen(argv[i]) > 0) {
-            if(i+1 == argc)
-                break;
-            i++;
-        }
+        // if(argv[i][0] == '-' && mx_strlen(argv[i]) > 0) {
+        //     if(i+1 == argc)
+        //         break;
+        //     i++;
+        // }
         if (access(argv[i], F_OK) != -1) {
             struct stat st;
             if (stat(argv[i], &st) == 0 && S_ISREG(st.st_mode)) {
@@ -116,9 +116,13 @@ void print_all_l(char **argv, t_flag *flags, int argc) {
                 dir_index++;
             }
         } else {
+            if(argv[i][0] == '-' && mx_strlen(argv[i]) > 1 && dir_index == 0) {
+
+            } else {
             mx_strcpy(list[check], argv[i]);
             flags->error = 1;
             check++;
+            }
         }
     }
     if(flags->error == 1) {

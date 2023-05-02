@@ -29,11 +29,17 @@ void uls_directory_search(int argc, char **argv, t_flag *flags) {
                 dir_index++;
             }
         } else {
-            mx_strcpy(list[check], argv[i]);
-            flags->error = -1;
-            check++;
+            if(argv[i][0] == '-' && mx_strlen(argv[i]) > 1) {
+
+            }
+            else {
+                mx_strcpy(list[check], argv[i]);
+                flags->error = -1;
+                check++;
+            }
         }
     }
+
     if(flags->error == -1) {
         sort_err(list, check);
         for(int i = 0; i < check; i++) {
@@ -41,13 +47,16 @@ void uls_directory_search(int argc, char **argv, t_flag *flags) {
                 print_dir_err(strerror(errno), list[i]);
         }
     }
-    if(file_count != 0)
-        sort_files(&files_head);
-        print_files(files_head, is_terminal);
+    if(file_count != 0) {
+        sort_files(&files_head, flags);
+        print_files(files_head, is_terminal, flags);
+    }
     if(directory_count != 0 && file_count > 0) {
         mx_printstr("\n");
     }
-    sort_files(&dirs_head);
+    if(directory_count > 1) {
+        sort_files(&dirs_head, flags);
+    }
     print_directories(dirs_head, is_terminal, file_count, directory_count, flags);
     for(int i = 0; i < num_words; i++) {
         free(list[i]);

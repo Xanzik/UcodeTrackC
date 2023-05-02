@@ -2,14 +2,14 @@
 
 void printl(t_flag *flags, int argc, char **argv) {
     if(argc == 2) {
-        print_current_l(flags);
+        print_current_l(flags, NULL, NULL);
     }
     else {
         print_all_l(argv, flags, argc);
     }
 }
 
-void printFileInfo(t_file *filename) {
+void printFileInfo(t_file *filename, t_flag *flags) {
     mx_printstr(filename->perms);
     mx_printchar(get_extra_perms(filename));
     mx_printstr(" ");
@@ -33,14 +33,20 @@ void printFileInfo(t_file *filename) {
         mx_printstr(filename->linked_file);
     }
     mx_printchar('\n');
+    if(flags->at && listxattr(filename->path, NULL, 0, XATTR_NOFOLLOW) > 0) {
+        output_xattr(filename->path);
+    }
+    if(flags->e && filename->acl_str != NULL) {
+        output_acl(filename->acl_str);
+    }
 }
 
-void print_current_l(t_flag *flags) {
-    DIR *dir;
+void print_current_l(t_flag *flags, DIR *dir, char *half) {
+    if(dir == NULL)
+        dir = opendir(".");
     struct dirent *entry;
     t_file *head = NULL;
     int index = 0;
-    dir = opendir(".");
     while ((entry = readdir(dir)) != NULL) {
         if (mx_strcmp(entry->d_name, ".") == 0
             || mx_strcmp(entry->d_name, "..") == 0
@@ -48,13 +54,22 @@ void print_current_l(t_flag *flags) {
                 continue;
         }
         char *path = entry->d_name;
+        if(flags->R == 1) {
+            if(half != NULL)
+                path = get_path_dir(half, entry->d_name);
+            add_file(&head, entry->d_name, index, flags, path);
+            index++;
+        } else {
         add_file(&head, path, index, flags, NULL);
         index++;
+        }
     }
-    int count = get_file_count(head);
+    int count = 0;
+    if(head != NULL)
+        count = get_file_count(head);
     t_file *current = head;
     if(count > 0)
-        sort_files(&current);
+        sort_files(&current, flags);
     info_lenght(&current);
     mx_printstr("total ");
     int total = 0;
@@ -62,12 +77,11 @@ void print_current_l(t_flag *flags) {
     mx_printint(total);
     mx_printchar('\n');
     while(current != NULL) {
-        if (lstat(current->name, &head->info) != -1) {
-            printFileInfo(current);
+        if (lstat(current->path, &head->info) != -1) {
+            printFileInfo(current, flags);
         }
         current = current->next;
     }
-    closedir(dir);
 }
 
 void print_all_l(char **argv, t_flag *flags, int argc) {
@@ -84,6 +98,11 @@ void print_all_l(char **argv, t_flag *flags, int argc) {
     }
     int check = 0;
     for (int i = 2; i < argc; i++) {
+        if(argv[i][0] == '-' && mx_strlen(argv[i]) > 0) {
+            if(i+1 == argc)
+                break;
+            i++;
+        }
         if (access(argv[i], F_OK) != -1) {
             struct stat st;
             if (stat(argv[i], &st) == 0 && S_ISREG(st.st_mode)) {
@@ -110,18 +129,18 @@ void print_all_l(char **argv, t_flag *flags, int argc) {
         }
     }
     if(file_count != 0) {
-        sort_files(&files_head);
+        sort_files(&files_head, flags);
         info_lenght(&files_head);
         while(files_head != NULL) {
         if (lstat(files_head->name, &files_head->info) != -1) {
-            printFileInfo(files_head);
+            printFileInfo(files_head, flags);
         }
         files_head = files_head->next;
         }
     }
     if(directory_count != 0 && file_count > 0) {
         mx_printchar('\n');
-        sort_files(&dirs_head);
+        sort_files(&dirs_head, flags);
     }
     print_dir_l(dirs_head, file_count, directory_count, flags);
 }
@@ -130,16 +149,15 @@ void print_dir_l(t_file *head, int file_count, int directory_count, t_flag *flag
     DIR *dir;
     struct dirent *de;
     t_file *current = head;
-    sort_files(&current);
+    sort_files(&current, flags);
     while (current != NULL) {
         if(directory_count != 1 || file_count > 0 || flags->error == -1) {
             mx_printstr(current->name);
             mx_printstr(":\n");
         }
         int total_blocks = 0;
-        mx_printstr("total: ");
+        mx_printstr("total ");
         dir = opendir(current->name);
-
         t_file *dir_files = NULL;
         int index = 0;
         while ((de = readdir(dir)) != NULL) {
@@ -155,13 +173,18 @@ void print_dir_l(t_file *head, int file_count, int directory_count, t_flag *flag
         total_blocks = total_block(&dir_files);
         mx_printint(total_blocks);
         mx_printstr("\n");
-        sort_files(&dir_files);
+        sort_files(&dir_files, flags);
         info_lenght(&dir_files);
         while(dir_files != NULL) {
             if (lstat(current->name, &dir_files->info) != -1) {
-                printFileInfo(dir_files);
+                printFileInfo(dir_files, flags);
             }
             dir_files = dir_files->next;
+        }
+        if(flags->R) {
+            dir = opendir(current->name);
+            //mx_printchar('\n');
+            print_R(flags, dir, current->name, 0, 0, 0);
         }
         if(current->next != NULL)
             mx_printchar('\n');
@@ -178,4 +201,50 @@ int total_block(t_file **files) {
         file = file->next;
     }
     return total;
+}
+
+void output_acl(const char* acl) {
+    char **acl_l = mx_strsplit(acl, '\n');
+    for(int i = 1; acl_l[i] != NULL; ++i) {
+        char **params = mx_strsplit(acl_l[i], ':');
+        acL_params(params, i-1);
+        mx_del_strarr(&params);
+    }
+    mx_del_strarr(&acl_l);
+}
+
+void acL_params(char **params, int i) {
+    mx_printchar(' ');
+    mx_printint(i);
+    mx_printstr(": ");
+    mx_printstr(params[0]);
+    mx_printstr(":");
+    mx_printstr(params[2]);
+    mx_printchar(' ');
+    mx_printstr(params[4]);
+    mx_printchar(' ');
+    mx_printstr(params[5]);
+    mx_printchar('\n');
+}
+
+void output_xattr(const char *path) {
+    char namebuf[255];
+    char tmp[255];
+    int len = listxattr(path, namebuf, 255, XATTR_NOFOLLOW);
+    int i = 0;
+    int temp_len = 0;
+    while(i < len) {
+        mx_printchar('\t');
+        mx_printstr(&namebuf[i]);
+        temp_len = getxattr(path, &namebuf[i], tmp, 255, 0, 0);
+
+        mx_printstr("\t   ");
+        if(temp_len != -1) {
+            mx_printint(temp_len);
+        } else {
+            mx_printint(0);
+        }
+        mx_printstr(" \n");
+        i+= mx_strlen(&namebuf[i]) + 1;
+    }
 }

@@ -2,14 +2,15 @@
 
 int main(int argc, char **argv) {
     t_flag *flags = get_flags(argc, argv);
-    if(flags->count == 0 && argc == 1) {
-        uls_without_flags(flags);
-    }
-    else if (flags->l == 1) {
+    bool c = check_dir(argv, argc);
+    if (flags->l == 1 && flags->R != 1) {
         printl(flags, argc, argv);
-    }
-    else if(argc != 1 && flags->count == 0) {
+    } else if(flags->R == 1) {
+        output_R_dir(argc, argv, flags);
+    } else if(c == 0) {
+        uls_without_flags(flags);
+    } else if(c == 1) {
          uls_directory_search(argc, argv, flags);
     }
-    return 0;
+    return flags->error;
 }

@@ -1,6 +1,6 @@
 #include "../inc/uls.h"
 
-void print_files(t_file *head, int is_terminal) {
+void print_files(t_file *head, int is_terminal, t_flag *flags) {
     int file_count;
     int width;
     int max_lenght;
@@ -14,14 +14,23 @@ void print_files(t_file *head, int is_terminal) {
 
     file_count = get_file_count(head);
     if(file_count != 1)
-        sort_files(&current);
+        sort_files(&current, flags);
     max_lenght = get_lenght(head);
     width = get_col_width(max_lenght);
     cols = get_cols(w.ws_col, width);
     if(file_count * width > w.ws_col) {
         mult = 1;
     }
-    if(is_terminal) {
+    if((!is_terminal || flags->one) && flags->C != 1) {
+        int step = 0;
+        while(step != file_count + 1) {
+            mx_printstr(current->name);
+            mx_printchar('\n');
+            if(current->next != NULL)
+                current = current->next;
+            step++;
+        }
+    } else if(is_terminal) {
         if(mult != 1) {
             current = head;
             while (current != NULL) {
@@ -46,15 +55,6 @@ void print_files(t_file *head, int is_terminal) {
                 mx_printstr("\n");
             }
         }
-    } else {
-        int step = 0;
-        while(step != file_count + 1) {
-            mx_printstr(current->name);
-            mx_printchar('\n');
-            if(current->next != NULL)
-                current = current->next;
-            step++;
-        }
     }
 }
 
@@ -63,10 +63,15 @@ void print_directories(t_file *head, int is_terminal, int file_count, int direct
     struct dirent *de;
     t_file *current = head;
     if(file_count > 1)
-        sort_files(&current);
+        sort_files(&current, flags);
     int step = 0;
     while (current != NULL) {
-        if(directory_count != 1 || file_count > 0 || (directory_count == 1 && flags->error == -1)) {
+        if(((directory_count != 1 || file_count > 0) || (directory_count == 1 && flags->error == -1))
+            && flags->R != 1) {
+            mx_printstr(current->name);
+            mx_printstr(":\n");
+        } else if(flags->R == 1) {
+            mx_printstr("./");
             mx_printstr(current->name);
             mx_printstr(":\n");
         }
@@ -80,27 +85,38 @@ void print_directories(t_file *head, int is_terminal, int file_count, int direct
                 || de->d_name[0] == '.'){
                 continue;
             }
-            add_file(&dir_files, de->d_name, index, flags, NULL);
+            if(flags->R == 1)
+                add_file(&dir_files, de->d_name, index, flags, current->name);
+            if(flags->R != 1)
+                add_file(&dir_files, de->d_name, index, flags, NULL);
             index++;
         }
-
         // Sort the files in this directory
-        sort_files(&dir_files);
-
+        sort_files(&dir_files, flags);
         // Print the files in this directory
-        print_files(dir_files, is_terminal);
-
+        if(index > 0 && flags->l != 1)
+            print_files(dir_files, is_terminal, flags);
+        if(index > 0 && flags->l == 1 && flags->R == 1) {
+            dir = opendir(current->path);
+            print_current_l(flags, dir, current->path);
+        }
         // Free the list of files for this directory
         free_files(dir_files);
-
+        if(flags->R) {
+            dir = opendir(current->name);
+                mx_printchar('\n');
+            print_R(flags, dir, current->name, 0, 0, 0);
+            
+        }
         step++;
         if (!is_terminal) {
             if(step != directory_count)
                 mx_printstr("\n");
-        }
+            }
         else {
-            if(step != directory_count)
+            if(step != directory_count && flags->R != 1) {
                 mx_printstr("\n");
+            }
         }
         current = current->next;
     }

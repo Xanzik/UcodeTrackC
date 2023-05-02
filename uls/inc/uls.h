@@ -17,7 +17,7 @@
 #include <grp.h>
 #include <time.h>
 
-#define FLAGS "l"
+#define FLAGS "lRC1AaGeT@rtucS"
 
 #define IS_DIR(mode) ((mode) & S_IFDIR ? "d" : "-")
 #define IS_RUSR(mode) ((mode) & S_IRUSR ? "r" : "-")
@@ -32,8 +32,21 @@
 
 typedef struct s_flag {
     int l;
+    int R;
+    int a;
+    int A;
+    int C;
+    int G;
+    int one;
+    int e;
     int count;
-
+    int T;
+    int at;
+    int r;
+    int u;
+    int c;
+    int S;
+    int t;
     int error;
 }               t_flag;
 
@@ -71,9 +84,7 @@ void uls_without_flags(t_flag *flags);
 void uls_directory_search(int argc, char **argv, t_flag *flags);
 
 void add_file(t_file **head, char *name, int index, t_flag *flags, char *path);
-void full_list(t_file **head,  t_flag *flags);
-//void full_list_l(t_file **files_head, t_file **dirs_head, t_flag *flags, int argc, char **argv);
-void sort_files(t_file **head);
+void full_list(t_file **head,  t_flag *flags, DIR *dir);
 void free_files(t_file *head);
 char *get_path_dir(char *dir, char* file);
 t_file* get_index_file(t_file* list, int index);
@@ -82,7 +93,7 @@ int get_lenght(t_file *head);
 int get_num_tabs(int width, int len);
 
 void print_directories(t_file *head, int is_terminal, int file_count, int directory_count, t_flag *flags);
-void print_files(t_file *head, int is_terminal);
+void print_files(t_file *head, int is_terminal, t_flag *flags);
 void printl(t_flag *flags, int argc, char **argv);
 
 int get_col_width(int max_lenght);
@@ -91,9 +102,9 @@ int get_cols(int w_cols, int width);
 void mx_print_tab(int width, int len);
 
 char *get_permissions(struct stat *info);
-void get_lm_date(t_file **file, struct stat *info);
+void get_lm_date(t_file **file, struct stat *info, t_flag *flags);
 
-void printFileInfo(t_file *filename);
+void printFileInfo(t_file *filename, t_flag *flags);
 
 t_flag* get_flags(int argc, char **argv);
 void add_flag(t_flag** flags, char flag);
@@ -114,9 +125,25 @@ void get_space(t_file **files, t_lenghts *lenghts);
 char *set_front_space(char *str, int max_lenght);
 char *set_back_space(char *str, int max_lenght);
 
-void print_current_l(t_flag *flags);
+void print_current_l(t_flag *flags, DIR *dir, char *half);
 void print_all_l(char **argv, t_flag *flags, int argc);
 void print_dir_l(t_file *head, int file_count, int directory_count, t_flag *flags);
 
 void print_dir_err(char *error, char *path);
+
 void sort_err(char **list, int n);
+void sort_by_mtime(t_file **head);
+void sort_files(t_file **head, t_flag *flags);
+void sort_r(t_file **head);
+void sort_by_atime(t_file **head);
+void sort_by_ctime(t_file **head);
+void sort_by_size(t_file **head);
+
+void print_R(t_flag *flags, DIR *dir, char *path, bool first, bool end, int num);
+void full_list_dir(t_file **head, t_flag *flags, DIR *dir, char *half);
+void output_R_dir(int argc, char **argv, t_flag *flags);
+bool check_dir(char **argv, int argc);
+char *get_acl_text(t_file *file, t_flag *flags);
+void acL_params(char **params, int i);
+void output_xattr(const char *path);
+void output_acl(const char* acl);

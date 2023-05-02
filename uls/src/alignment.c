@@ -10,7 +10,6 @@ int get_lenght(t_file *head) {
         }
         current = current->next;
     }
-    free_files(current);
     return max_lenght;
 }
 

@@ -43,12 +43,12 @@ void print_files(t_file *head, int is_terminal, t_flag *flags) {
             mx_printchar('\n');
         }
         else {
-            rows = get_rows(cols, file_count);
+            rows = get_rows(cols, file_count+1);
             for(int i = 0; i < rows; i++) {
-                for(int j = 0; j+i < file_count + 1; j += rows) {
+                for(int j = 0; j+i < file_count+1; j += rows) {
                     current = get_index_file(head, i+j);
                     mx_printstr(current->name);
-                    if(current->next && i+j+rows < file_count + 1) {
+                    if(current->next && i+j+rows < file_count+1) {
                         mx_print_tab(width, mx_strlen(current->name));
                     }
                 }

@@ -117,11 +117,11 @@ void print_all_l(char **argv, t_flag *flags, int argc) {
             }
         } else {
             mx_strcpy(list[check], argv[i]);
-            flags->error = -1;
+            flags->error = 1;
             check++;
         }
     }
-    if(flags->error == -1) {
+    if(flags->error == 1) {
         sort_err(list, check);
         for(int i = 0; i < check; i++) {
             if(list[i] != NULL)

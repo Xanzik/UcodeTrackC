@@ -66,7 +66,7 @@ void print_directories(t_file *head, int is_terminal, int file_count, int direct
         sort_files(&current, flags);
     int step = 0;
     while (current != NULL) {
-        if(((directory_count != 1 || file_count > 0) || (directory_count == 1 && flags->error == -1))
+        if(((directory_count != 1 || file_count > 0) || (directory_count == 1 && flags->error == 1))
             && flags->R != 1) {
             mx_printstr(current->name);
             mx_printstr(":\n");

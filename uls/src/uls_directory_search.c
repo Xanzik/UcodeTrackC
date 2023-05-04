@@ -16,7 +16,8 @@ void uls_directory_search(int argc, char **argv, t_flag *flags) {
     int check = 0;
     is_terminal = isatty(STDOUT_FILENO);
     for (int i = 1; i < argc; i++) {
-        if (access(argv[i], F_OK) != -1) {
+        struct stat st;
+        if (lstat(argv[i], &st) == 0) {
             struct stat st;
             if (stat(argv[i], &st) == 0 && S_ISREG(st.st_mode)) {
                 file_count++;

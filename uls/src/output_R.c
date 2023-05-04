@@ -64,20 +64,20 @@ void output_R_dir(int argc, char **argv, t_flag *flags) {
         int dier = 0;
         if(argc > flags->count) {
             for (int i = 1; i < argc; i++) {
-                if (access(argv[i], F_OK) != -1) {
                 struct stat st;
-                if (stat(argv[i], &st) == 0 && S_ISREG(st.st_mode)) {
-                    add_file(&files, argv[i], file_index, flags, NULL);
-                    file_index++;
-                }
-                else {
-                if(argv[i][0] == '-' && mx_strlen(argv[i]) > 1 && file_index == 0) {
+                if (lstat(argv[i], &st) == 0) {
+                    if (stat(argv[i], &st) == 0 && S_ISREG(st.st_mode)) {
+                        add_file(&files, argv[i], file_index, flags, NULL);
+                        file_index++;
+                    }
+                    else {
+                    if(argv[i][0] == '-' && mx_strlen(argv[i]) > 1 && file_index == 0) {
 
-                } else {
-                    mx_strcpy(list[dier], argv[i]);
-                    dier++;
-                }
-                }
+                    } else {
+                        mx_strcpy(list[dier], argv[i]);
+                        dier++;
+                    }
+                    }
                 }
             }
             sort_files(&files, flags);

@@ -98,13 +98,9 @@ void print_all_l(char **argv, t_flag *flags, int argc) {
     }
     int check = 0;
     for (int i = 2; i < argc; i++) {
-        // if(argv[i][0] == '-' && mx_strlen(argv[i]) > 0) {
-        //     if(i+1 == argc)
-        //         break;
-        //     i++;
-        // }
-        if (access(argv[i], F_OK) != -1) {
-            struct stat st;
+        struct stat st;
+        if (lstat(argv[i], &st) == 0) {
+
             if (stat(argv[i], &st) == 0 && S_ISREG(st.st_mode)) {
                 file_count++;
                 add_file(&files_head, argv[i], file_index, flags, NULL);

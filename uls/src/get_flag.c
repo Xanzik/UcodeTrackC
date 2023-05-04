@@ -15,7 +15,7 @@ t_flag* get_flags(int argc, char **argv) {
                     mx_printerr("illegal option -- ");
                     mx_printerr(&argv[i][j]);
                     mx_printerr("\n");
-                    mx_printerr("usage : uls [-l] [file ...]\n");
+                    mx_printerr("usage : uls [-lRC1AaGeT@rtucS] [file ...]\n");
                     exit(1);
                 }
             }

@@ -22,7 +22,7 @@ void printFileInfo(t_file *filename, t_flag *flags) {
     mx_printstr(filename->size);
     mx_printstr(" ");
     mx_printstr(filename->lm_month);
-    mx_printstr(" ");
+    mx_printstr("  ");
     mx_printstr(filename->lm_day);
     mx_printstr(" ");
     mx_printstr(filename->lm_time);
